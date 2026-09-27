@@ -1,0 +1,230 @@
+{
+  "info": {
+    "name": "Internship Management API",
+    "description": "Postman collection for the Internship Management REST API (candidate CRUD, search, validation and authentication tests).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "basic",
+    "basic": [
+      { "key": "username", "value": "admin", "type": "string" },
+      { "key": "password", "value": "admin123", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "candidateId", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "01 - Get All Candidates (No Auth) -> 401",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        },
+        {
+          "name": "02 - Get All Candidates (Valid Auth) -> 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CRUD",
+      "item": [
+        {
+          "name": "03 - Create Candidate -> 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const body = pm.response.json();",
+                  "    pm.collectionVariables.set('candidateId', body.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rahul Kumar\",\n  \"email\": \"rahul@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"role\": \"Java Developer\",\n  \"status\": \"APPLIED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        },
+        {
+          "name": "04 - Get All Candidates -> 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        },
+        {
+          "name": "05 - Get Candidate By ID -> 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates/{{candidateId}}", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "{{candidateId}}"] }
+          }
+        },
+        {
+          "name": "06 - Update Candidate -> 200",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rahul Kumar\",\n  \"email\": \"rahul@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"role\": \"Backend Developer\",\n  \"status\": \"SHORTLISTED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates/{{candidateId}}", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "{{candidateId}}"] }
+          }
+        },
+        {
+          "name": "07 - Delete Candidate -> 204",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates/{{candidateId}}", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "{{candidateId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "08 - Search By Role -> 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/search?role=Java Developer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "search"],
+              "query": [{ "key": "role", "value": "Java Developer" }]
+            }
+          }
+        },
+        {
+          "name": "09 - Search By Status -> 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/search?status=SHORTLISTED",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "search"],
+              "query": [{ "key": "status", "value": "SHORTLISTED" }]
+            }
+          }
+        },
+        {
+          "name": "10 - Search By Role And Status -> 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/candidates/search?role=Java Developer&status=SHORTLISTED",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "candidates", "search"],
+              "query": [
+                { "key": "role", "value": "Java Developer" },
+                { "key": "status", "value": "SHORTLISTED" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validation & Error Testing",
+      "item": [
+        {
+          "name": "11 - Invalid Email -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"9876543210\",\n  \"role\": \"Java Developer\",\n  \"status\": \"APPLIED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        },
+        {
+          "name": "12 - Invalid Phone -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test.user@gmail.com\",\n  \"phone\": \"abc123\",\n  \"role\": \"Java Developer\",\n  \"status\": \"APPLIED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        },
+        {
+          "name": "13 - Missing Required Field (name) -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test.user2@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"role\": \"Java Developer\",\n  \"status\": \"APPLIED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        },
+        {
+          "name": "14 - Invalid Status -> 400",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test.user3@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"role\": \"Java Developer\",\n  \"status\": \"NOT_A_REAL_STATUS\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          }
+        },
+        {
+          "name": "15 - Candidate Not Found -> 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/candidates/999999", "host": ["{{baseUrl}}"], "path": ["api", "candidates", "999999"] }
+          }
+        },
+        {
+          "name": "16 - Duplicate Email -> 409",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rahul Kumar\",\n  \"email\": \"rahul@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"role\": \"Java Developer\",\n  \"status\": \"APPLIED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/candidates", "host": ["{{baseUrl}}"], "path": ["api", "candidates"] }
+          },
+          "description": "Run request 03 twice (or run this after 03) to see the 409 Conflict response for a duplicate email."
+        }
+      ]
+    }
+  ]
+}
